@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <title>IA</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .videoMsg {
+      position: absolute;
+      z-index: 10;
+      top: 72%;
+    }
+
+    .spanVideoMsg {
+      color: white;
+      font-size: 20px;
+    }
+  </style>
+</head>
+
+<body id="cuerpo">
+
+  <video muted autoplay loop preload="auto" width="100%" height="100%" style="position: fixed; overflow: hidden;  padding: 0; margin: 0; " id="reposoTrack">
+    <source src="/media/video/reposo/reposo.mp4" type="video/mp4">
+    <source src="/media/video/reposo/reposo.wav" type="video/wav">
+    <source src="/media/video/reposo/reposo.webm" type="video/webm">
+    <source src="/media/video/reposo/reposo.ogg" type="video/ogg">
+    Tu navegador no soporta HTML5 video.
+  </video>
+
+  <video style="display:none;" src="/media/video/saludo/saludo.mp4" preload="auto" width="100%" height="100%" style="position: fixed; overflow: hidden;  padding: 0; margin: 0; " id="saludoTrack">
+    Tu navegador no soporta HTML5 video.
+  </video>
+
+  <video style="display:none;" src="/media/video/pregunta/pregunta.mp4" preload="auto" width="100%" height="100%" style="position: fixed; overflow: hidden;  padding: 0; margin: 0; " id="preguntaTrack">
+    Tu navegador no soporta HTML5 video.
+  </video>
+
+  <div class="container-fluid videoMsg d-none" id="recognizedTxtCaption">
+    <div class="row justify-content-center d-flex align-items-center text-center">
+      <div class="col-md-4 p-3 justify-content-center d-flex align-items-center text-center" style="background-color: black;">
+        <span class="spanVideoMsg text-center" id="spanRecognizedTxtCaption">Contesta y al final menciona la palabra 'ahora'</span>
+      </div>
+    </div>
+  </div>
+
+  <video style="display:none;" src="/media/video/respuesta/respuesta.mp4" preload="auto" width="100%" height="100%" style="position: fixed; overflow: hidden;  padding: 0; margin: 0; " id="respuestaTrack">
+    Tu navegador no soporta HTML5 video.
+  </video>
+
+  <video style="display:none;" src="/media/video/cierre/cierre.mp4" preload="auto" width="100%" height="100%" style="position: fixed; overflow: hidden;  padding: 0; margin: 0; " id="cierreTrack">
+    Tu navegador no soporta HTML5 video.
+  </video>
+
+  <script src="/artyom.window.js"></script>
+  <script src="/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/functions.js"></script>
+
+  <script>
+    // INSTANCIA DE JARVIS
+    let Jarvis = new Artyom();
+  </script>
+
+  <script>
+    // SWITCH LENGUAGE
+    function start(language, mode) {
+      if (!language)
+        language = Jarvis.getLanguage();
+
+      let _startArtyom = function() {
+        Jarvis.initialize({
+          lang: language, // Start artyom with provided language
+          continuous: true, // Continuous mode enabled
+          listen: true, // Start recognizing
+          debug: true, // Show everything in the console
+          speed: 1, // talk normally
+          volume: 10,
+          soundex: true,
+          mode: mode, // Opciones: quick, normal, slow
+          // name: "jarvis"
+          // obeyKeyword: "start again",
+          // executionKeyword: "now" // say "now" at the end of a command to execute it immediately
+        });
+
+        console.log("Artyom is listening to your commands");
+      };
+
+      // stop artyom if stills active
+      Jarvis.fatality();
+      setTimeout(_startArtyom, 250);
+    }
+  </script>
+
+  <script>
+    let respuestaMode = 'quick';
+
+    document.getElementById('saludoTrack').addEventListener('ended', () => {
+      setTimeout(() => {
+        playVideo('preguntaTrack')
+      }, 1100);
+    });
+
+    document.getElementById('respuestaTrack').addEventListener('ended', () => {
+
+      if (document.getElementById("videoMsgRespuesta"))
+        document.getElementById("videoMsgRespuesta").classList.add("d-none");
+    });
+
+    function configVideos(arrVideoElementsIds = ["reposoTrack", "saludoTrack", "preguntaTrack", "respuestaTrack", "cierreTrack"]) {
+
+
+      arrVideoElementsIds.forEach(video => {
+        let videoElement = document.getElementById(video);
+        videoElement.style.width = screen.width;
+        videoElement.style.height = screen.height;
+
+        if (video != 'reposoTrack') {
+          document.getElementById(video).addEventListener('ended', () => {
+            document.getElementById(video).style.display = 'none';
+            document.getElementById('reposoTrack').style.display = 'inherit';
+            document.getElementById('reposoTrack').play();
+          });
+
+          document.getElementById(video).addEventListener('play', () => {
+            document.getElementById('reposoTrack').style.display = 'none';
+          });
+        }
+      });
+    }
+
+    async function playVideo(videoId) {
+      document.getElementById(videoId).style.display = 'inherit';
+      await document.getElementById(videoId).play();
+    }
+
+    configVideos();
+  </script>
+
+  <script>
+    if (!Jarvis.recognizingSupported()) {
+      alert("navegador no soportado. Se necesita Google Chrome versión 25 y posteriores")
+    }
+
+    Jarvis.when("SPEECH_SYNTHESIS_START", function() {
+      if (Jarvis.isRecognizing() || Jarvis.isSpeaking()) {
+        Jarvis.dontObey();
+      }
+    });
+
+    Jarvis.when("SPEECH_SYNTHESIS_END", function() {
+      setTimeout(() => {
+        if (!Jarvis.isRecognizing() || !Jarvis.isSpeaking()) {
+          Jarvis.obey();
+        }
+      }, 1000);
+    });
+
+    const commands = {
+      saludos: ['saludos', 'hola', 'Buenas', 'Buenos días', 'Cómo estás'],
+      respuestasPreguntaArteFavorito: ['monalisa', 'mon alisa', 'odisea', 'romeo y julieta'],
+      respuestasOpinionRobot: ['a bueno', 'me alegra', 'si sabe', 'interesante', 'a que interesante eso, explicame mas', 'hasta luego'],
+      modoReposo: ['reposo'],
+      modoFrasesLentas: ['lento', 'cortas', 'lento'],
+      modoFrasesNormales: ['normal', 'normales'],
+      modoFrasesLargas: ['largo', 'largas', 'rapido'],
+      silenciar: ['silencio', 'callate'],
+    }
+
+    const arrsCommands = Object.values(commands)
+    const arrAttachedCommands = [].concat(...arrsCommands);
+    const arrAttachedCommandsLength = arrAttachedCommands.length
+    const commandsLengths = []
+
+    arrsCommands.forEach(elem => {
+      commandsLengths.push(elem.length)
+    })
+
+    console.log('commandsLengths', commandsLengths)
+    console.log(arrAttachedCommandsLength)
+
+    const commandsLengthsLength = commandsLengths.length
+    const arrSec = []
+    let acumulador = [];
+
+    for (let i = 0; i < commandsLengthsLength; i++) {
+      if (i == 0) {
+        arrSec.push(commandsLengths[i])
+        acumulador.push(commandsLengths[i])
+      } else {
+        arrSec.push(acumulador.reduce((a, b) => a + b, 0) + commandsLengths[i])
+        acumulador.push(commandsLengths[i])
+      }
+    }
+
+    function identifySection(arrSecti, commandIndex) {
+      let lastIndex = 0,
+        defValue = 0;
+
+      arrSecti.forEach((elem, index) => {
+
+        if (commandIndex >= lastIndex && commandIndex < elem) {
+          lastIndex = elem;
+          defValue = index;
+          return;
+        }
+
+        lastIndex = elem;
+      })
+
+      console.log(defValue, 'defValue')
+
+      return defValue
+    }
+
+    // Sigue validacion con arrSec
+    console.log(arrSec)
+
+    let flag = false
+
+    Jarvis.on(arrAttachedCommands).then(
+      function(i) {
+
+        console.log('textooo:', i)
+
+        const defCommand = identifySection(arrSec, i)
+
+        console.log('defCommand', defCommand)
+        switch (defCommand) {
+          case 0:
+
+            playVideo('saludoTrack');
+
+            break;
+          case 1:
+            playVideo('respuestaTrack');
+            break;
+          case 2:
+            playVideo('cierreTrack');
+            break;
+          case 3:
+            playVideo('reposoTrack');
+            Jarvis.say("Estoy sin hacer nada");
+            break;
+          case 4:
+            Jarvis.say("Modo frases lentas activado", {
+              onStart() {
+                Jarvis.dontObey();
+              },
+              onEnd() {
+                Jarvis.obey();
+              },
+            })
+            start('es-ES', 'slow');
+            if (respuestaMode) respuestaMode = 'slow'
+            break;
+          case 5:
+            Jarvis.say("Modo frases normales activado", {
+              onStart() {
+                Jarvis.dontObey();
+              },
+              onEnd() {
+                Jarvis.obey();
+              },
+            })
+            start('es-ES', 'normal');
+            if (respuestaMode) respuestaMode = 'normal'
+            break;
+          case 6:
+            Jarvis.say("Modo frases rápidas activado", {
+              onStart() {
+                Jarvis.dontObey();
+              },
+              onEnd() {
+                Jarvis.obey();
+              },
+            })
+            start('es-ES', 'quick');
+            if (respuestaMode) respuestaMode = 'quick'
+            break;
+          case 7:
+            console.log('PAUSADO')
+            // if (!flag) {
+            //   document.querySelectorAll('video').forEach(elem => {
+
+            //     console.log(elem)
+            //     // elem.setAttribute('muted', 'true')
+            //     // elem.defaultMuted = true;
+            //     elem.pause();
+            //     // elem.currentTime = 0;
+            //   });
+
+            //   flag = true;
+            // }
+            Jarvis.shutUp();
+
+            break;
+        }
+      });
+
+    Jarvis.when("ERROR", function(data) {
+      console.error(data);
+    });
+
+    let dontUnderstand = 0
+
+    Jarvis.when("NOT_COMMAND_MATCHED", function(data) {
+
+      if (dontUnderstand >= 10) {
+        Jarvis.say("No te entendí, intentalo nuevamente", {
+          onStart() {
+            Jarvis.dontObey();
+          },
+          onEnd() {
+            Jarvis.obey();
+          },
+        });
+
+        dontUnderstand = 0;
+      }
+
+      dontUnderstand++;
+    })
+
+    start("es-ES", 'quick');
+  </script>
+
+  <script>
+    document.querySelectorAll('video').forEach(elem => {
+      if (elem.id != 'reposoTrack') {
+        elem.addEventListener('play', function() {
+          Jarvis.dontObey();
+        });
+
+        elem.addEventListener('ended', function() {
+          setTimeout(() => {
+            Jarvis.obey();
+          }, 1000);
+        });
+      }
+    });
+  </script>
+
+</body>
+
+</html>
+<!-- HACER CLIC AL CARGAR LA PÁGINA POR PRIMERA VEZ -->

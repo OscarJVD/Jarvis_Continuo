@@ -1,0 +1,26 @@
+{
+    "name": "servernodehttps",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "npm run open && nodemon index.js --host my.local.host",
+        "open": "start microsoft-edge:https://my.local.host:50000/",
+        "build": "nexe index.js --host my.local.host --build"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "consolidate": "^0.16.0",
+        "express": "^4.17.1",
+        "fs": "0.0.1-security",
+        "https": "^1.0.0",
+        "path": "^0.12.7",
+        "swig": "^1.4.2"
+    },
+    "devDependencies": {
+        "nexe": "^4.0.0-beta.19",
+        "nodemon": "^2.0.15"
+    }
+}
