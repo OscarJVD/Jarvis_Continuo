@@ -194,7 +194,7 @@ var Artyom = (function () {
           const arrForbidden = ['ERROR', 'SPEECH_SYNTHESIS_START', 'SPEECH_SYNTHESIS_END', 'TEXT_RECOGNIZED', 'COMMAND_RECOGNITION_START', 'COMMAND_RECOGNITION_END', 'COMMAND_MATCHED', 'NOT_COMMAND_MATCHED', 'text chunk pro']
 
           if (recognizedTxtCaption && spanRecognizedTxtCaption && arrForbidden.every(value => !message.includes(value))) {
-            spanRecognizedTxtCaption.textContent = message.replace('Quick mode :', '');
+            spanRecognizedTxtCaption.textContent = message.replace('Quick mode :', '').replace('>>', '');
             recognizedTxtCaption.classList.remove('d-none');
           }
 
@@ -202,7 +202,7 @@ var Artyom = (function () {
             setTimeout(() => {
               if (recognizedTxtCaption)
                 recognizedTxtCaption.classList.add('d-none');
-            }, 15000);
+            }, 20000);
           }
 
           break;

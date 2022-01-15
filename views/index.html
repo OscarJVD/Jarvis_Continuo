@@ -6,6 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/audioViewer.css">
   <title>IA</title>
 
   <style>
@@ -22,14 +23,22 @@
       top: 72%;
     }
 
+    .audioViewer {
+      position: absolute;
+      z-index: 20;
+      top: 22%;
+    }
+
     .spanVideoMsg {
       color: white;
-      font-size: 20px;
+      font-size: 80px;
     }
   </style>
 </head>
 
 <body id="cuerpo">
+
+  <!-- <button id="soundStart" style="visibility: hidden; z-index: 200; position: absolute; left: 2%;">TEST</button> -->
 
   <video muted autoplay loop preload="auto" width="100%" height="100%" style="position: fixed; overflow: hidden;  padding: 0; margin: 0; " id="reposoTrack">
     <source src="/media/video/reposo/reposo.mp4" type="video/mp4">
@@ -47,12 +56,10 @@
     Tu navegador no soporta HTML5 video.
   </video>
 
-  <div class="container-fluid videoMsg d-none" id="recognizedTxtCaption">
-    <div class="row justify-content-center d-flex align-items-center text-center">
-      <div class="col-md-4 p-3 justify-content-center d-flex align-items-center text-center" style="background-color: black;">
-        <span class="spanVideoMsg text-center" id="spanRecognizedTxtCaption">Contesta y al final menciona la palabra 'ahora'</span>
-      </div>
-    </div>
+  <canvas id="waves" class="audioViewer"></canvas>
+
+  <div class="container-fluid videoMsg d-none p-3 justify-content-center d-flex align-items-center text-center" style="background-color: white;" id="recognizedTxtCaption">
+    <span class="spanVideoMsg text-center text-dark" id="spanRecognizedTxtCaption">Contesta y al final menciona la palabra 'ahora'</span>
   </div>
 
   <video style="display:none;" src="/media/video/respuesta/respuesta.mp4" preload="auto" width="100%" height="100%" style="position: fixed; overflow: hidden;  padding: 0; margin: 0; " id="respuestaTrack">
@@ -63,9 +70,11 @@
     Tu navegador no soporta HTML5 video.
   </video>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="/artyom.window.js"></script>
   <script src="/bootstrap/js/bootstrap.min.js"></script>
   <script src="/functions.js"></script>
+  <script src="/audioViewer.js"></script>
 
   <script>
     // INSTANCIA DE JARVIS
@@ -316,7 +325,7 @@
 
     Jarvis.when("NOT_COMMAND_MATCHED", function(data) {
 
-      if (dontUnderstand >= 10) {
+      if (dontUnderstand >= 50) {
         Jarvis.say("No te entendí, intentalo nuevamente", {
           onStart() {
             Jarvis.dontObey();
